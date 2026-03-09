@@ -8,6 +8,14 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+if ! command -v curl &> /dev/null || ! command -v git &> /dev/null; then
+    echo "Installing missing dependencies..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y --no-install-recommends curl git ca-certificates
+    rm -rf /var/lib/apt/lists/*
+fi
+
 if ! command -v uv &> /dev/null; then
     echo "uv not found. Installing uv globally..."
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
