@@ -1,0 +1,48 @@
+name: "CI/CD"
+
+on:
+  push:
+    branches:
+      - main # (Change to master if you kept the old branch name)
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # JOB 1: Run the tests in a matrix
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features: ["speckit"]
+        baseImage:
+          - debian:latest
+          - ubuntu:latest
+          - mcr.microsoft.com/devcontainers/base:ubuntu
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install Dev Container CLI"
+        run: npm install -g @devcontainers/cli
+
+      - name: "Run tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
+        run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} --skip-scenarios
+
+  # JOB 2: Publish the feature (ONLY if tests pass AND we are on the main branch)
+  deploy:
+    needs: test # <-- THIS IS THE MAGIC LINE
+    if: ${{ github.ref == 'refs/heads/main' }} # (Change to master if needed)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Publish Features"
+        uses: devcontainers/action@v1
+        with:
+          publish-features: "true"
+          base-path-to-features: "./src"
+          generate-docs: "true"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
