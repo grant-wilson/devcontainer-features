@@ -1,0 +1,26 @@
+name: "Test Features"
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        features: ["speckit"]
+        baseImage:
+          - debian:latest
+          - ubuntu:latest
+          - mcr.microsoft.com/devcontainers/base:ubuntu
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install Dev Container CLI"
+        run: npm install -g @devcontainers/cli
+
+      - name: "Run tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
+        run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} --skip-scenarios

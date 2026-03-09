@@ -1,0 +1,14 @@
+{
+  "id": "speckit",
+  "version": "1.0.0",
+  "name": "GitHub Spec Kit",
+  "description": "Installs GitHub Spec Kit (specify-cli) using uv.",
+  "options": {
+    "version": {
+      "type": "string",
+      "proposals": ["latest"],
+      "default": "latest",
+      "description": "Select the GitHub tag/version to install"
+    }
+  }
+}
