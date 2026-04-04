@@ -12,7 +12,16 @@ if ! command -v curl &> /dev/null || ! command -v git &> /dev/null; then
     echo "Installing missing dependencies..."
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends curl git ca-certificates
+    apt-get install -y --no-install-recommends curl git ca-certificates python3
+    rm -rf /var/lib/apt/lists/*
+fi
+
+# Ensure Python is available (uv needs it)
+if ! command -v python3 &> /dev/null; then
+    echo "Installing Python..."
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y --no-install-recommends python3
     rm -rf /var/lib/apt/lists/*
 fi
 
@@ -22,6 +31,10 @@ if ! command -v uv &> /dev/null; then
 fi
 
 echo "Installing GitHub Spec Kit (specify-cli)..."
+
+# Create necessary directories
+mkdir -p /opt/uv-tools
+mkdir -p /opt/uv-python
 
 export UV_TOOL_DIR="/opt/uv-tools"
 export UV_TOOL_BIN_DIR="/usr/local/bin"
@@ -33,6 +46,7 @@ else
     uv tool install specify-cli --from "git+https://github.com/github/spec-kit.git@${VERSION}"
 fi
 
+# Make tools accessible to all users
 chmod -R a+rx /opt/uv-tools
 chmod -R a+rx /opt/uv-python
 
