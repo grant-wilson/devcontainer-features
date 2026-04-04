@@ -1,6 +1,6 @@
 {
   "id": "speckit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "GitHub Spec Kit",
   "description": "Installs GitHub Spec Kit (specify-cli) using uv.",
   "options": {
