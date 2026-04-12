@@ -17,17 +17,33 @@ fi
 echo "Installing Claude Code..."
 curl -fsSL https://claude.ai/install.sh | bash
 
-# The native installer may place the binary in a user-local directory.
-# Ensure it is accessible system-wide for all container users.
-if ! command -v claude &> /dev/null; then
-    for candidate_dir in "$HOME/.claude/bin" "$HOME/.local/bin" "$HOME/.nvm/versions/node/"*/bin; do
-        if [ -f "$candidate_dir/claude" ]; then
-            echo "Linking $candidate_dir/claude -> /usr/local/bin/claude"
-            ln -sf "$candidate_dir/claude" /usr/local/bin/claude
+# The native installer places the binary at $HOME/.local/bin/claude (e.g.
+# /root/.local/bin/claude). Since /root is mode 700, a symlink from
+# /usr/local/bin into that path is inaccessible to non-root container users
+# (e.g. vscode). Copy the binary to /usr/local/bin so all users can run it.
+CLAUDE_BIN=$(command -v claude 2>/dev/null || true)
+
+if [ -z "$CLAUDE_BIN" ]; then
+    for candidate in \
+        "$HOME/.local/bin/claude" \
+        "$HOME/.claude/bin/claude"; do
+        if [ -f "$candidate" ]; then
+            CLAUDE_BIN="$candidate"
             break
         fi
     done
 fi
 
+# Also check nvm-managed node bins
+if [ -z "$CLAUDE_BIN" ]; then
+    CLAUDE_BIN=$(find "$HOME/.nvm/versions/node" -name "claude" -type f 2>/dev/null | head -1 || true)
+fi
+
+if [ -n "$CLAUDE_BIN" ] && [ "$CLAUDE_BIN" != "/usr/local/bin/claude" ]; then
+    echo "Copying $CLAUDE_BIN -> /usr/local/bin/claude"
+    cp "$CLAUDE_BIN" /usr/local/bin/claude
+    chmod 0755 /usr/local/bin/claude
+fi
+
 echo "Claude Code installation complete."
-claude --version
+/usr/local/bin/claude --version
