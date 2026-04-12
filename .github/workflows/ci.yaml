@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: ["speckit"]
+        features: ["speckit", "claude"]
         baseImage:
           - debian:latest
           - ubuntu:latest

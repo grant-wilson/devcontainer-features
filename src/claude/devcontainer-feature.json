@@ -1,0 +1,7 @@
+{
+  "id": "claude",
+  "version": "1.0.0",
+  "name": "Claude Code",
+  "description": "Installs Claude Code CLI using the official native installer (https://claude.ai/install.sh).",
+  "options": {}
+}
