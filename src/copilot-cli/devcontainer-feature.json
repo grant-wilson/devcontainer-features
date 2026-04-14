@@ -1,0 +1,7 @@
+{
+  "id": "copilot-cli",
+  "version": "1.0.0",
+  "name": "GitHub Copilot CLI",
+  "description": "Installs GitHub Copilot CLI using the official install script (https://gh.io/copilot-install).",
+  "options": {}
+}

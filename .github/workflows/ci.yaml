@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: ["speckit", "claude"]
+        features: ["speckit", "claude", "copilot-cli"]
         baseImage:
           - debian:latest
           - ubuntu:latest
