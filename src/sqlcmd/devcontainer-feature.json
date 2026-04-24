@@ -1,0 +1,7 @@
+{
+  "id": "sqlcmd",
+  "version": "1.0.0",
+  "name": "sqlcmd (Go)",
+  "description": "Installs sqlcmd (Go) — the go-mssqldb-based SQL Server command-line tool — via the latest GitHub release from microsoft/go-sqlcmd.",
+  "options": {}
+}
