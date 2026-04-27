@@ -1,0 +1,7 @@
+{
+  "id": "sqlpackage",
+  "version": "1.0.0",
+  "name": "sqlpackage",
+  "description": "Installs sqlpackage — the SQL Server DAC command-line tool — via the official Microsoft Linux zip download (https://aka.ms/sqlpackage-linux).",
+  "options": {}
+}
