@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: ["speckit", "claude", "copilot-cli", "sqlcmd"]
+        features: ["speckit", "claude", "copilot-cli", "sqlcmd", "dotnet-aspire"]
         baseImage:
           - debian:latest
           - ubuntu:latest

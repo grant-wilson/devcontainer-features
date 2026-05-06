@@ -1,0 +1,7 @@
+{
+  "id": "dotnet-aspire",
+  "version": "1.0.0",
+  "name": "Aspire CLI",
+  "description": "Installs the Aspire CLI using the official install script (https://aspire.dev/install.sh).",
+  "options": {}
+}
