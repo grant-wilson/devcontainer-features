@@ -20,6 +20,7 @@ jobs:
           - mcr.microsoft.com/devcontainers/base:ubuntu
           - mcr.microsoft.com/devcontainers/base:ubuntu-24.04
           - mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie
+          - mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +30,27 @@ jobs:
       - name: "Run tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
         run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} --skip-scenarios
 
-  # JOB 2: Publish the feature (ONLY if tests pass AND we are on the main branch)
+  # JOB 2: Test dotnet-tools against .NET-enabled base images (full scenario matrix)
+  test-dotnet-tools:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        baseImage:
+          - mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
+          - mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm
+          - mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Install Dev Container CLI"
+        run: npm install -g @devcontainers/cli
+
+      - name: "Run tests for 'dotnet-tools' against '${{ matrix.baseImage }}'"
+        run: devcontainer features test -f dotnet-tools -i ${{ matrix.baseImage }}
+
+  # JOB 3: Publish the feature (ONLY if tests pass AND we are on the main branch)
   deploy:
-    needs: test # <-- THIS IS THE MAGIC LINE
+    needs: [test, test-dotnet-tools] # <-- THIS IS THE MAGIC LINE
     if: ${{ github.ref == 'refs/heads/main' }} # (Change to master if needed)
     runs-on: ubuntu-latest
     permissions:

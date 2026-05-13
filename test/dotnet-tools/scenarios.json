@@ -1,0 +1,18 @@
+{
+  "install_single_tool": {
+    "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+    "features": {
+      "dotnet-tools": {
+        "tools": "dotnet-ef"
+      }
+    }
+  },
+  "install_multiple_tools": {
+    "image": "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+    "features": {
+      "dotnet-tools": {
+        "tools": "dotnet-ef,dotnet-outdated-tool"
+      }
+    }
+  }
+}

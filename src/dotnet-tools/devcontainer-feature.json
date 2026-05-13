@@ -1,0 +1,13 @@
+{
+  "id": "dotnet-tools",
+  "version": "1.0.0",
+  "name": ".NET Global Tools",
+  "description": "Installs one or more .NET global tools via 'dotnet tool install'. Requires the .NET SDK to already be present in the container.",
+  "options": {
+    "tools": {
+      "type": "string",
+      "default": "",
+      "description": "Comma-separated list of .NET tool package IDs to install globally (e.g. 'dotnet-ef,dotnet-outdated-tool')."
+    }
+  }
+}
