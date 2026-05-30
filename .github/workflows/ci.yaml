@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: ["speckit", "claude", "copilot-cli", "sqlcmd", "dotnet-aspire"]
+        features: ["speckit", "claude", "copilot-cli", "sqlcmd", "dotnet-aspire", "devcontainers-cli"]
         baseImage:
           - debian:latest
           - ubuntu:latest
@@ -25,7 +25,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: "Install Dev Container CLI"
-        run: npm install -g @devcontainers/cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
+          echo "$HOME/.devcontainers/bin" >> "$GITHUB_PATH"
 
       - name: "Run tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
         run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} --skip-scenarios
@@ -43,7 +45,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: "Install Dev Container CLI"
-        run: npm install -g @devcontainers/cli
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
+          echo "$HOME/.devcontainers/bin" >> "$GITHUB_PATH"
 
       - name: "Run tests for 'dotnet-tools' against '${{ matrix.baseImage }}'"
         run: devcontainer features test -f dotnet-tools -i ${{ matrix.baseImage }}
