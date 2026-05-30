@@ -1,0 +1,27 @@
+{
+  "install_nonguix_channel": {
+    "image": "ubuntu:latest",
+    "features": {
+      "guix": {
+        "installNonguix": true
+      }
+    }
+  },
+  "pin_guix_and_nonguix_channels": {
+    "image": "ubuntu:latest",
+    "features": {
+      "guix": {
+        "installNonguix": true,
+        "pinnedChannels": "guix=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,nonguix=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    }
+  },
+  "configure_authorized_substitutes": {
+    "image": "ubuntu:latest",
+    "features": {
+      "guix": {
+        "authorizedSubstitutes": "https://substitutes.nonguix.org|base64:ZmFrZS1ub25ndWl4LXNpZ25pbmcta2V5"
+      }
+    }
+  }
+}
