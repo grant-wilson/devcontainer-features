@@ -51,9 +51,12 @@ jobs:
   # JOB 3: Publish the feature (ONLY if tests pass AND we are on the main branch)
   test-guix:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         baseImage:
+          - debian:latest
           - ubuntu:latest
     steps:
       - uses: actions/checkout@v4

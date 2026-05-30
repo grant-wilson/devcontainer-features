@@ -147,8 +147,8 @@ if [ -n "${AUTHORIZED_SUBSTITUTES}" ]; then
         fi
         echo "${substitute_url}" >> "${substitute_url_file}"
         if [ -n "${key_source:-}" ]; then
-            host_key_name="$(echo "${substitute_url}" | sed -E 's#^[a-zA-Z]+://##' | tr '/:?' '_' | sed 's/[^a-zA-Z0-9._-]/_/g')"
-            key_target="${acl_dir}/${host_key_name}.pub"
+            key_file_hash="$(printf '%s' "${substitute_url}" | sha256sum | cut -c1-16)"
+            key_target="${acl_dir}/${key_file_hash}.pub"
             if [[ "${key_source}" == base64:* ]]; then
                 printf '%s' "${key_source#base64:}" | base64 -d > "${key_target}"
             elif [[ "${key_source}" =~ ^https?:// ]]; then
