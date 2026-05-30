@@ -1,0 +1,7 @@
+{
+  "id": "devcontainers-cli",
+  "version": "1.0.0",
+  "name": "Dev Containers CLI",
+  "description": "Installs the Dev Containers CLI using the official devcontainers/cli install script, providing the 'devcontainer' command.",
+  "options": {}
+}
