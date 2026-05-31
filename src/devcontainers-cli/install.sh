@@ -6,11 +6,19 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+PACKAGES_TO_INSTALL=()
 if ! command -v curl &> /dev/null && ! command -v wget &> /dev/null; then
-    echo "Installing curl..."
+    PACKAGES_TO_INSTALL+=(curl ca-certificates)
+fi
+if ! command -v xz &> /dev/null; then
+    PACKAGES_TO_INSTALL+=(xz-utils)
+fi
+
+if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
+    echo "Installing dependencies: ${PACKAGES_TO_INSTALL[*]}..."
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends curl ca-certificates
+    apt-get install -y --no-install-recommends "${PACKAGES_TO_INSTALL[@]}"
     rm -rf /var/lib/apt/lists/*
 fi
 
