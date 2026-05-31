@@ -1,0 +1,48 @@
+{
+    "groups": [
+        {
+            "name": "standard",
+            "skipScenarios": true,
+            "features": [
+                "speckit",
+                "claude",
+                "copilot-cli",
+                "sqlcmd",
+                "dotnet-aspire",
+                "devcontainers-cli",
+                "guix"
+            ],
+            "baseImages": [
+                "debian:latest",
+                "ubuntu:latest",
+                "mcr.microsoft.com/devcontainers/base:ubuntu",
+                "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+                "mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie",
+                "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble"
+            ]
+        },
+        {
+            "name": "dotnet-tools",
+            "skipScenarios": false,
+            "features": [
+                "dotnet-tools"
+            ],
+            "baseImages": [
+                "mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm",
+                "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
+                "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble"
+            ]
+        },
+        {
+            "name": "guix-scenarios",
+            "skipScenarios": false,
+            "features": [
+                "guix"
+            ],
+            "baseImages": [
+                "debian:latest",
+                "ubuntu:latest"
+            ]
+        }
+    ]
+}

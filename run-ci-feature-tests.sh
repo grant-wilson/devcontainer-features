@@ -4,6 +4,34 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$REPO_ROOT"
 
+usage() {
+  cat <<'EOF'
+Usage: run-ci-feature-tests.sh [feature]
+
+Runs the dev container feature tests defined in test-matrix.json.
+
+Arguments:
+  feature   Optional. Only run tests for the given feature (e.g. devcontainers-cli).
+            When omitted, tests for all features are run.
+EOF
+}
+
+feature_filter=""
+case "${1-}" in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    feature_filter="${1-}"
+    ;;
+esac
+
+if ! command -v jq &> /dev/null; then
+  echo "Error: 'jq' is required but not installed." >&2
+  exit 1
+fi
+
 if ! command -v devcontainer &> /dev/null; then
   echo "Installing Dev Containers CLI..."
   curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
@@ -11,40 +39,26 @@ fi
 
 export PATH="$HOME/.devcontainers/bin:$PATH"
 
-features=(
-  speckit
-  claude
-  copilot-cli
-  sqlcmd
-  dotnet-aspire
-  devcontainers-cli
-)
+combos="$("$REPO_ROOT/scripts/expand-test-matrix.sh" "$feature_filter")"
 
-base_images=(
-  debian:latest
-  ubuntu:latest
-  mcr.microsoft.com/devcontainers/base:ubuntu
-  mcr.microsoft.com/devcontainers/base:ubuntu-24.04
-  mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie
-  mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
-)
+if [ "$(jq 'length' <<<"$combos")" -eq 0 ]; then
+  if [ -n "$feature_filter" ]; then
+    echo "No tests found for feature '$feature_filter' in test-matrix.json." >&2
+  else
+    echo "No tests found in test-matrix.json." >&2
+  fi
+  exit 1
+fi
 
-dotnet_tools_base_images=(
-  mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
-  mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm
-  mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
-)
-
-for feature in "${features[@]}"; do
-  for base_image in "${base_images[@]}"; do
-    echo "Running ${feature} on ${base_image} (--skip-scenarios)"
-    devcontainer features test -f "$feature" -i "$base_image" --skip-scenarios
-  done
-done
-
-for base_image in "${dotnet_tools_base_images[@]}"; do
-  echo "Running dotnet-tools on ${base_image}"
-  devcontainer features test -f dotnet-tools -i "$base_image"
-done
+while IFS=$'\t' read -r feature base_image skip_scenarios; do
+  args=(-f "$feature" -i "$base_image")
+  scenario_note=""
+  if [ "$skip_scenarios" = "true" ]; then
+    args+=(--skip-scenarios)
+    scenario_note=" (--skip-scenarios)"
+  fi
+  echo "Running ${feature} on ${base_image}${scenario_note}"
+  devcontainer features test "${args[@]}" < /dev/null
+done < <(jq -r '.[] | [.feature, .baseImage, .skipScenarios] | @tsv' <<<"$combos")
 
 echo "All CI-equivalent feature tests completed successfully."

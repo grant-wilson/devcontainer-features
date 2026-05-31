@@ -8,19 +8,27 @@ on:
   workflow_dispatch:
 
 jobs:
-  # JOB 1: Run the tests in a matrix
+  # JOB 0: Load the feature/baseImage test matrix from the single source of
+  # truth (test-matrix.json) so it does not have to be duplicated here.
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.expand.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Expand test matrix"
+        id: expand
+        run: echo "matrix=$(bash ./scripts/expand-test-matrix.sh)" >> "$GITHUB_OUTPUT"
+
+  # JOB 1: Run the tests in a matrix loaded from test-matrix.json
   test:
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        features: ["speckit", "claude", "copilot-cli", "sqlcmd", "dotnet-aspire", "devcontainers-cli", "guix"]
-        baseImage:
-          - debian:latest
-          - ubuntu:latest
-          - mcr.microsoft.com/devcontainers/base:ubuntu
-          - mcr.microsoft.com/devcontainers/base:ubuntu-24.04
-          - mcr.microsoft.com/devcontainers/typescript-node:4-24-trixie
-          - mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
+        include: ${{ fromJSON(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
 
@@ -29,51 +37,17 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
           echo "$HOME/.devcontainers/bin" >> "$GITHUB_PATH"
 
-      - name: "Run tests for '${{ matrix.features }}' against '${{ matrix.baseImage }}'"
-        run: devcontainer features test -f ${{ matrix.features }} -i ${{ matrix.baseImage }} --skip-scenarios
-
-  # JOB 2: Test dotnet-tools against .NET-enabled base images (full scenario matrix)
-  test-dotnet-tools:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        baseImage:
-          - mcr.microsoft.com/devcontainers/dotnet:1-9.0-bookworm
-          - mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm
-          - mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Install Dev Container CLI"
+      - name: "Run tests for '${{ matrix.feature }}' against '${{ matrix.baseImage }}'"
         run: |
-          curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
-          echo "$HOME/.devcontainers/bin" >> "$GITHUB_PATH"
+          if [ "${{ matrix.skipScenarios }}" = "true" ]; then
+            devcontainer features test -f "${{ matrix.feature }}" -i "${{ matrix.baseImage }}" --skip-scenarios
+          else
+            devcontainer features test -f "${{ matrix.feature }}" -i "${{ matrix.baseImage }}"
+          fi
 
-      - name: "Run tests for 'dotnet-tools' against '${{ matrix.baseImage }}'"
-        run: devcontainer features test -f dotnet-tools -i ${{ matrix.baseImage }}
-
-  # JOB 3: Publish the feature (ONLY if tests pass AND we are on the main branch)
-  test-guix:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    strategy:
-      matrix:
-        baseImage:
-          - debian:latest
-          - ubuntu:latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: "Install Dev Container CLI"
-        run: npm install -g @devcontainers/cli
-
-      - name: "Run guix scenario tests against '${{ matrix.baseImage }}'"
-        run: devcontainer features test -f guix -i ${{ matrix.baseImage }}
-
-  # JOB 4: Publish the feature (ONLY if tests pass AND we are on the main branch)
+  # JOB 2: Publish the feature (ONLY if tests pass AND we are on the main branch)
   deploy:
-    needs: [test, test-dotnet-tools, test-guix] # <-- THIS IS THE MAGIC LINE
+    needs: [test] # <-- THIS IS THE MAGIC LINE
     if: ${{ github.ref == 'refs/heads/main' }} # (Change to master if needed)
     runs-on: ubuntu-latest
     permissions:
