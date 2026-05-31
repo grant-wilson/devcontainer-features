@@ -14,7 +14,7 @@ INSTALLER_URL="${INSTALLER_URL:-${INSTALLERURL:-https://git.savannah.gnu.org/cgi
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y --no-install-recommends bash curl ca-certificates gnupg
+apt-get install -y --no-install-recommends bash curl ca-certificates gnupg wget xz-utils
 rm -rf /var/lib/apt/lists/*
 
 tmp_dir="$(mktemp -d)"
@@ -28,7 +28,15 @@ if ! curl -fsSL "${INSTALLER_URL}" -o "${installer_path}"; then
 fi
 
 chmod +x "${installer_path}"
-yes '' | bash "${installer_path}"
+# The installer reads newlines from stdin to auto-confirm prompts. Pipe a stream
+# of blank lines, tolerating the SIGPIPE that 'yes' receives once the installer
+# stops reading (which would otherwise surface as exit code 141 under pipefail).
+installer_status=0
+yes '' | bash "${installer_path}" || installer_status=$?
+if [ "${installer_status}" -ne 0 ] && [ "${installer_status}" -ne 141 ]; then
+    echo "Guix installer exited with status ${installer_status}."
+    exit "${installer_status}"
+fi
 
 if [ -f /root/.config/guix/current/etc/profile ]; then
     # shellcheck disable=SC1091
@@ -131,7 +139,9 @@ echo ")" >> "${channel_file}"
 cp "${channel_file}" /root/.config/guix/channels.scm
 
 substitute_url_file="/etc/guix/substitute-urls"
-acl_dir="/etc/guix/acl"
+# The Guix installer manages /etc/guix/acl as a single-file signing-key ACL, so
+# store the feature's substitute keys in a dedicated directory to avoid clobbering it.
+acl_dir="/etc/guix/acl.d"
 mkdir -p "${acl_dir}"
 : > "${substitute_url_file}"
 
