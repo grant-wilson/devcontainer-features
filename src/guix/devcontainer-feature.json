@@ -1,6 +1,6 @@
 {
   "id": "guix",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "GNU Guix",
   "description": "Installs GNU Guix using the official binary installation script and configures optional channels, substitutes, and channel pinning.",
   "options": {

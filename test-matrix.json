@@ -39,7 +39,6 @@
                 "guix"
             ],
             "baseImages": [
-                "debian:latest",
                 "ubuntu:latest"
             ]
         }
