@@ -23,5 +23,14 @@
         "authorizedSubstitutes": "https://substitutes.nonguix.org|base64:ZmFrZS1ub25ndWl4LXNpZ25pbmcta2V5"
       }
     }
+  },
+  "configure_guile_load_path": {
+    "image": "ubuntu:latest",
+    "features": {
+      "guix": {
+        "guileLoadPath": "/workspaces/myrepo/packages",
+        "guileLoadCompiledPath": "/workspaces/myrepo/packages"
+      }
+    }
   }
 }
