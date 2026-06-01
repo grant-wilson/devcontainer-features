@@ -6,6 +6,8 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 INSTALL_NONGUIX="${INSTALL_NONGUIX:-${INSTALLNONGUIX:-false}}"
 EXTRA_CHANNELS="${EXTRA_CHANNELS:-${EXTRACHANNELS:-}}"
 PINNED_CHANNELS="${PINNED_CHANNELS:-${PINNEDCHANNELS:-}}"
@@ -219,6 +221,12 @@ EOF
     fi
     chmod 0644 "${guile_profile}"
 fi
+
+# Install the runtime entrypoint that starts guix-daemon when the container
+# boots. A dev container typically has no init system, so the systemd unit the
+# upstream installer registers never runs and `guix pull` cannot reach the
+# daemon socket without this.
+install -m 0755 "${SCRIPT_DIR}/start-guix-daemon.sh" /usr/local/share/guix-start-daemon.sh
 
 echo "Guix installation complete."
 guix --version

@@ -39,5 +39,6 @@
       "default": "",
       "description": "Colon-separated directories to prepend to GUILE_LOAD_COMPILED_PATH so compiled Guile (.go) modules can be loaded from those locations, e.g. '/workspaces/myrepo/packages'."
     }
-  }
+  },
+  "entrypoint": "/usr/local/share/guix-start-daemon.sh"
 }

@@ -9,8 +9,7 @@
                 "copilot-cli",
                 "sqlcmd",
                 "dotnet-aspire",
-                "devcontainers-cli",
-                "guix"
+                "devcontainers-cli"
             ],
             "baseImages": [
                 "debian:latest",
