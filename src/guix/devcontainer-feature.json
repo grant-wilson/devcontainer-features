@@ -28,6 +28,16 @@
       "type": "string",
       "default": "https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh",
       "description": "Guix installer script URL."
+    },
+    "guileLoadPath": {
+      "type": "string",
+      "default": "",
+      "description": "Colon-separated directories to prepend to GUILE_LOAD_PATH so Guile (.scm) modules can be imported from those locations, e.g. '/workspaces/myrepo/packages'."
+    },
+    "guileLoadCompiledPath": {
+      "type": "string",
+      "default": "",
+      "description": "Colon-separated directories to prepend to GUILE_LOAD_COMPILED_PATH so compiled Guile (.go) modules can be loaded from those locations, e.g. '/workspaces/myrepo/packages'."
     }
   }
 }

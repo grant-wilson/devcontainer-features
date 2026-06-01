@@ -11,6 +11,8 @@ EXTRA_CHANNELS="${EXTRA_CHANNELS:-${EXTRACHANNELS:-}}"
 PINNED_CHANNELS="${PINNED_CHANNELS:-${PINNEDCHANNELS:-}}"
 AUTHORIZED_SUBSTITUTES="${AUTHORIZED_SUBSTITUTES:-${AUTHORIZEDSUBSTITUTES:-}}"
 INSTALLER_URL="${INSTALLER_URL:-${INSTALLERURL:-https://git.savannah.gnu.org/cgit/guix.git/plain/etc/guix-install.sh}}"
+GUILE_LOAD_PATH_EXTRA="${GUILE_LOAD_PATH_EXTRA:-${GUILELOADPATH:-}}"
+GUILE_LOAD_COMPILED_PATH_EXTRA="${GUILE_LOAD_COMPILED_PATH_EXTRA:-${GUILELOADCOMPILEDPATH:-}}"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
@@ -178,6 +180,44 @@ if [ -s "${substitute_url_file}" ]; then
 export GUIX_SUBSTITUTE_URLS="${substitute_urls}"
 EOF
     chmod 0644 /etc/profile.d/guix-substitutes.sh
+fi
+
+# Normalize a colon-separated list of paths, trimming whitespace around each
+# entry and dropping empty entries.
+normalize_path_list() {
+    local raw="$1"
+    local normalized=""
+    local entry
+    IFS=':' read -ra path_entries <<< "${raw}"
+    for entry in "${path_entries[@]}"; do
+        entry="$(echo "${entry}" | xargs)"
+        [ -z "${entry}" ] && continue
+        if [ -z "${normalized}" ]; then
+            normalized="${entry}"
+        else
+            normalized="${normalized}:${entry}"
+        fi
+    done
+    printf '%s' "${normalized}"
+}
+
+guile_load_path="$(normalize_path_list "${GUILE_LOAD_PATH_EXTRA}")"
+guile_load_compiled_path="$(normalize_path_list "${GUILE_LOAD_COMPILED_PATH_EXTRA}")"
+
+if [ -n "${guile_load_path}" ] || [ -n "${guile_load_compiled_path}" ]; then
+    guile_profile="/etc/profile.d/guix-guile-load-path.sh"
+    : > "${guile_profile}"
+    if [ -n "${guile_load_path}" ]; then
+        cat >> "${guile_profile}" <<EOF
+export GUILE_LOAD_PATH="${guile_load_path}\${GUILE_LOAD_PATH:+:\$GUILE_LOAD_PATH}"
+EOF
+    fi
+    if [ -n "${guile_load_compiled_path}" ]; then
+        cat >> "${guile_profile}" <<EOF
+export GUILE_LOAD_COMPILED_PATH="${guile_load_compiled_path}\${GUILE_LOAD_COMPILED_PATH:+:\$GUILE_LOAD_COMPILED_PATH}"
+EOF
+    fi
+    chmod 0644 "${guile_profile}"
 fi
 
 echo "Guix installation complete."
