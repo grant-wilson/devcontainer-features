@@ -25,9 +25,13 @@ if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
 fi
 
 echo "Installing Claude Code..."
-export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
 npm_config_cafile=/etc/ssl/certs/ca-certificates.crt npm install -g @anthropic-ai/claude-code
 CLAUDE_BIN="$(npm prefix -g)/bin/claude"
+
+if [ ! -x "$CLAUDE_BIN" ]; then
+    echo "Claude binary was not installed at $CLAUDE_BIN."
+    exit 1
+fi
 
 echo "Claude Code installation complete."
 "$CLAUDE_BIN" --version
