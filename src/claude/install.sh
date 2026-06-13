@@ -25,19 +25,23 @@ if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
 fi
 
 echo "Installing Claude Code..."
-if ! npm_config_cafile=/etc/ssl/certs/ca-certificates.crt npm install -g @anthropic-ai/claude-code; then
+export npm_config_cafile=/etc/ssl/certs/ca-certificates.crt
+
+if ! npm install -g @anthropic-ai/claude-code; then
     echo "Failed to install Claude Code from npm."
     exit 1
 fi
 
-CLAUDE_BIN="$(npm prefix -g)/bin/claude"
-
-if [ ! -x "$CLAUDE_BIN" ]; then
-    CLAUDE_BIN="$(command -v claude 2>/dev/null || true)"
-fi
+CLAUDE_PREFIX="$(npm prefix -g)"
+CLAUDE_BIN="$(command -v claude 2>/dev/null || true)"
 
 if [ -z "$CLAUDE_BIN" ] || [ ! -x "$CLAUDE_BIN" ]; then
     echo "Claude binary was not installed at the expected location: $CLAUDE_BIN"
+    exit 1
+fi
+
+if [ "$CLAUDE_BIN" != "$CLAUDE_PREFIX/bin/claude" ]; then
+    echo "Claude binary resolved outside npm's global prefix: $CLAUDE_BIN"
     exit 1
 fi
 
