@@ -29,7 +29,7 @@ npm_config_cafile=/etc/ssl/certs/ca-certificates.crt npm install -g @anthropic-a
 CLAUDE_BIN="$(npm prefix -g)/bin/claude"
 
 if [ ! -x "$CLAUDE_BIN" ]; then
-    echo "Claude binary was not installed at $CLAUDE_BIN."
+    echo "Claude binary was not installed at the expected location: $CLAUDE_BIN"
     exit 1
 fi
 
