@@ -33,15 +33,10 @@ if ! npm install -g @anthropic-ai/claude-code; then
 fi
 
 CLAUDE_PREFIX="$(npm prefix -g)"
-CLAUDE_BIN="$(command -v claude 2>/dev/null || true)"
+CLAUDE_BIN="$CLAUDE_PREFIX/bin/claude"
 
-if [ -z "$CLAUDE_BIN" ] || [ ! -x "$CLAUDE_BIN" ]; then
-    echo "Claude binary was not installed at the expected location: $CLAUDE_BIN"
-    exit 1
-fi
-
-if [ "$CLAUDE_BIN" != "$CLAUDE_PREFIX/bin/claude" ]; then
-    echo "Claude binary resolved outside npm's global prefix: $CLAUDE_BIN"
+if [ ! -x "$CLAUDE_BIN" ]; then
+    echo "Claude binary was not found at the expected npm global path: $CLAUDE_BIN"
     exit 1
 fi
 
