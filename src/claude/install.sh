@@ -27,6 +27,7 @@ fi
 echo "Installing Claude Code..."
 export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
 npm_config_cafile=/etc/ssl/certs/ca-certificates.crt npm install -g @anthropic-ai/claude-code
+CLAUDE_BIN="$(npm prefix -g)/bin/claude"
 
 echo "Claude Code installation complete."
-claude --version
+"$CLAUDE_BIN" --version
