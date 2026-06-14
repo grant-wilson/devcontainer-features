@@ -6,39 +6,44 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-PACKAGES_TO_INSTALL=()
-
-if ! command -v npm &> /dev/null; then
-    PACKAGES_TO_INSTALL+=(nodejs npm)
-fi
-
-if [ ! -f /etc/ssl/certs/ca-certificates.crt ]; then
-    PACKAGES_TO_INSTALL+=(ca-certificates)
-fi
-
-if [ ${#PACKAGES_TO_INSTALL[@]} -gt 0 ]; then
+if ! command -v curl &> /dev/null; then
     echo "Installing missing dependencies..."
     export DEBIAN_FRONTEND=noninteractive
     apt-get update
-    apt-get install -y --no-install-recommends "${PACKAGES_TO_INSTALL[@]}"
+    apt-get install -y --no-install-recommends curl ca-certificates
     rm -rf /var/lib/apt/lists/*
 fi
 
 echo "Installing Claude Code..."
-export npm_config_cafile=/etc/ssl/certs/ca-certificates.crt
+curl -fsSL https://claude.ai/install.sh | bash
 
-if ! npm install -g @anthropic-ai/claude-code; then
-    echo "Failed to install Claude Code from npm."
-    exit 1
+# The native installer places the binary at $HOME/.local/bin/claude (e.g.
+# /root/.local/bin/claude). Since /root is mode 700, a symlink from
+# /usr/local/bin into that path is inaccessible to non-root container users
+# (e.g. vscode). Copy the binary to /usr/local/bin so all users can run it.
+CLAUDE_BIN=$(command -v claude 2>/dev/null || true)
+
+if [ -z "$CLAUDE_BIN" ]; then
+    for candidate in \
+        "$HOME/.local/bin/claude" \
+        "$HOME/.claude/bin/claude"; do
+        if [ -f "$candidate" ]; then
+            CLAUDE_BIN="$candidate"
+            break
+        fi
+    done
 fi
 
-CLAUDE_PREFIX="$(npm prefix -g)"
-CLAUDE_BIN="$CLAUDE_PREFIX/bin/claude"
+# Also check nvm-managed node bins
+if [ -z "$CLAUDE_BIN" ]; then
+    CLAUDE_BIN=$(find "$HOME/.nvm/versions/node" -name "claude" -type f 2>/dev/null | head -1 || true)
+fi
 
-if [ ! -x "$CLAUDE_BIN" ]; then
-    echo "Claude binary was not found at the expected npm global path: $CLAUDE_BIN"
-    exit 1
+if [ -n "$CLAUDE_BIN" ] && [ "$CLAUDE_BIN" != "/usr/local/bin/claude" ]; then
+    echo "Copying $CLAUDE_BIN -> /usr/local/bin/claude"
+    cp "$CLAUDE_BIN" /usr/local/bin/claude
+    chmod 0755 /usr/local/bin/claude
 fi
 
 echo "Claude Code installation complete."
-"$CLAUDE_BIN" --version
+/usr/local/bin/claude --version
