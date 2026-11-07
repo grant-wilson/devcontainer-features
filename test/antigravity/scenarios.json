@@ -1,0 +1,11 @@
+{
+  "pinned_version": {
+    "image": "debian:bookworm-slim",
+    "remoteUser": "nobody",
+    "features": {
+      "antigravity": {
+        "version": "1.5.3"
+      }
+    }
+  }
+}
