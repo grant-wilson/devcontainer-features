@@ -21,6 +21,18 @@
             ]
         },
         {
+            "name": "antigravity",
+            "skipScenarios": false,
+            "features": [
+                "antigravity"
+            ],
+            "baseImages": [
+                "debian:latest",
+                "ubuntu:latest",
+                "mcr.microsoft.com/devcontainers/base:ubuntu"
+            ]
+        },
+        {
             "name": "dotnet-tools",
             "skipScenarios": false,
             "features": [
@@ -31,6 +43,6 @@
                 "mcr.microsoft.com/devcontainers/dotnet:1-8.0-bookworm",
                 "mcr.microsoft.com/devcontainers/dotnet:dev-10.0-noble"
             ]
-        },
+        }
     ]
 }

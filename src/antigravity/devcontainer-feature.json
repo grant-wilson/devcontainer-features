@@ -1,0 +1,13 @@
+{
+  "id": "antigravity",
+  "version": "1.0.0",
+  "name": "Google Antigravity CLI",
+  "description": "Installs the official Google Antigravity CLI (agy) system-wide on Debian/Ubuntu Linux, supporting amd64 and arm64.",
+  "options": {
+    "version": {
+      "type": "string",
+      "default": "latest",
+      "description": "Antigravity CLI release version to install, without a v prefix (e.g. 1.5.3), or latest."
+    }
+  }
+}
